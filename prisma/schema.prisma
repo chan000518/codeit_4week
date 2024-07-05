@@ -25,10 +25,9 @@ model User {
   firstName String
   lastName  String
   address   String
-
+  
   // @default(now()): 기본값을 현재 시간으로 설정
   createdAt DateTime @default(now())
-
   // @updatedAt: 레코드가 업데이트될 때마다 자동으로 현재 시간으로 설정
   updatedAt DateTime @updatedAt
 }

@@ -17,18 +17,42 @@ model User {
   // @id: 이 필드를 기본 키로 설정. 
   // 기본 키는 각 레코드에서 고유한 값(중복x)
   // 유효한 UUID 형식의 아이디를 기본값으로 할당
-  id        String   @id @default(uuid()) 
+  id String @id @default(uuid())
 
   // @unique : 유니크한 아이디 (중복 x)
-  email     String   @unique 
+  email String @unique
 
-  firstName String   
-  lastName  String   
-  address   String   
+  firstName String
+  lastName  String
+  address   String
 
   // @default(now()): 기본값을 현재 시간으로 설정
-  createdAt DateTime @default(now()) 
-  
+  createdAt DateTime @default(now())
+
   // @updatedAt: 레코드가 업데이트될 때마다 자동으로 현재 시간으로 설정
-  updatedAt DateTime @updatedAt 
+  updatedAt DateTime @updatedAt
+}
+
+enum Category {
+  FASHION
+  BEAUTY
+  SPORTS
+  ELECTRONICS
+  HOME_INTERIOR
+  HOUSEHOLD_SUPPLIES
+  KITCHENWARE
+}
+
+model Product {
+  id         String   @id @default(uuid())
+  name       String
+  descrition String?
+  category   Category
+  price      Float
+  stock      Int
+  // @default(now()): 기본값을 현재 시간으로 설정
+  createdAt  DateTime @default(now())
+
+  // @updatedAt: 레코드가 업데이트될 때마다 자동으로 현재 시간으로 설정
+  updatedAt DateTime @updatedAt
 }

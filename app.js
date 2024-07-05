@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import { create } from 'superstruct';
 
 const prisma = new PrismaClient();
 
@@ -9,7 +10,23 @@ const app = express();
 app.use(express.json());
 
 app.get('/users', async (req, res) => {
-  const users = await prisma.user.findMany();
+  // 구조 분해 할당
+  const { offset = 0, limit = 10, order = "newest"} = req.query
+  let orderBy;
+  switch(order) {
+    case 'oldest':
+      orderBy = {createAt : 'asc'};
+      break;
+    case 'newest':
+    default:
+      orderBy = {createAt: 'desc'};
+  }
+  const users = await prisma.user.findMany({
+    orderBy,
+    skip: parseInt(offset),
+    take: parseInt(limit),
+  });
+
   res.send(users);
 });
 
@@ -52,7 +69,30 @@ app.delete('/users/:id', async (req, res) => {
 
 app.get('/products', async (req, res) => {
   // 상품 목록 조회
-  const products = await prisma.product.findMany();
+  const { order = "newest", offset = 0, limit = 10, category = null } = req.query;
+  let orderBy;
+  switch (order) {
+    case 'priceLowest':
+      orderBy = { price: 'asc' };
+      break;
+    case 'priceHighest':
+      orderBy = { price: 'desc' };
+      break;
+    case 'oldest':
+      orderBy = { createdAt: 'asc' };
+      break;
+    case 'newest':
+    default:
+      orderBy = { createdAt: 'desc' };
+  }
+
+  const products = await prisma.product.findMany({
+    orderBy,
+    skip: parseInt(offset),
+    take: parseInt(limit),
+    where: category ? { category } : {},
+  });
+  
   res.send(products);
 });
 

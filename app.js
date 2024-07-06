@@ -2,7 +2,8 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
-import { create } from 'superstruct';
+import { assert } from 'superstruct';
+import { CreateUser, PatchUser } from './structs.js';
 
 const prisma = new PrismaClient();
 
@@ -39,14 +40,18 @@ app.get('/users/:id', async (req, res) => {
 });
 
 app.post('/users', async (req, res) => {
+  // 유효성 검사
+  assert(req.body, CreateUser);
   // 리퀘스트 바디 내용으로 유저 생성
   const user = await prisma.user.create({
     data: req.body,
-  })
+  });
   res.status(201).send(user);
 });
 
 app.patch('/users/:id', async (req, res) => {
+  // 유효성 검사
+  assert(req.body, PatchUser);
   const { id } = req.params;
   // 리퀘스트 바디 내용으로 id에 해당하는 유저 수정
   const user = await prisma.user.update({

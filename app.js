@@ -56,6 +56,13 @@ app.get('/users', asyncHandler(async (req, res) => {
     orderBy,
     skip: parseInt(offset),
     take: parseInt(limit),
+    include: {
+      userPreference : {
+        select:{
+          receiveEmail: true,
+        }
+      }
+    },
   });
   res.send(users);
 }));
@@ -64,6 +71,9 @@ app.get('/users/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const user = await prisma.user.findUniqueOrThrow({
     where: { id },
+    include: {
+      userPreference : true,
+    },
   });
   res.send(user);
 }));
@@ -93,6 +103,30 @@ app.delete('/users/:id', asyncHandler(async (req, res) => {
   });
   res.sendStatus(204);
 }));
+
+
+app.get('/users/:id/saved-products', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { savedProducts } = await prisma.user.findUniqueOrThrow({
+    where: { id },
+    include: {
+      savedProducts : true,
+    },
+  });
+  res.send(savedProducts);
+}));
+
+app.get('/users/:id/orders', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { orders } = await prisma.user.findUniqueOrThrow({
+    where: { id },
+    include: {
+      orders : true,
+    },
+  });
+  res.send(orders);
+}));
+
 
 /*********** products ***********/
 
@@ -157,6 +191,7 @@ app.delete('/products/:id', asyncHandler(async (req, res) => {
   res.sendStatus(204);
 }));
 
+
 /*********** orders ***********/
 
 app.get('/orders', asyncHandler(async (req, res) => {
@@ -168,6 +203,9 @@ app.get('/orders/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const order = await prisma.order.findUniqueOrThrow({
     where: { id },
+    include: {
+      orderItems: true,
+    },
   });
   res.send(order);
 }));

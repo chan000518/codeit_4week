@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import { PrismaClient, Prisma } from '@prisma/client';
-import { assert } from 'superstruct';
+import { assert, create } from 'superstruct';
 import {
   CreateUser,
   PatchUser,
@@ -80,8 +80,17 @@ app.get('/users/:id', asyncHandler(async (req, res) => {
 
 app.post('/users', asyncHandler(async (req, res) => {
   assert(req.body, CreateUser);
+  const { userPreference, ...userFields} = req.body;
   const user = await prisma.user.create({
-    data: req.body,
+    data: {
+      ...userFields,
+      userPreference: {
+        create: userPreference,
+      },
+    },
+    include: {
+      userPreference: true
+    }
   });
   res.status(201).send(user);
 }));
@@ -91,7 +100,15 @@ app.patch('/users/:id', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const user = await prisma.user.update({
     where: { id },
-    data: req.body,
+    data: {
+      ...userFields,
+      userPreference: {
+        update: userPreference,
+      },
+    },
+    include: {
+      userPreference: true
+    }
   });
   res.send(user);
 }));
@@ -207,13 +224,27 @@ app.get('/orders/:id', asyncHandler(async (req, res) => {
       orderItems: true,
     },
   });
+  let total = 0;
+  order.orderItems.forEach((orderItem) => {
+    total += orderItem.unitPrice * orderItem.quantity;  
+  });
+  order.total = total;
   res.send(order);
 }));
 
 app.post('/orders', asyncHandler(async (req, res) => {
   assert(req.body, CreateOrder);
+  const {orderItems, ...orderFields} = req.body;
   const order = await prisma.order.create({
-    data: req.body,
+    data: {
+      ...orderFields,
+      orderItems: {
+        create: orderItems,
+      },
+    },
+    include: {
+      orderItems: true,
+    },
   });
   res.status(201).send(order);
 }));
